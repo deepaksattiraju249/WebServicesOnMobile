@@ -26,8 +26,7 @@ import org.jivesoftware.smack.packet.Presence;
 class XMPPClient {
 	
 	
-	  private static final int packetReplyTimeout = 500; // millis
-	    
+	  private static final int packetReplyTimeout = 500; // millis  
 	    public String server;
 	    public int port;
 	    public String servername;
@@ -40,7 +39,9 @@ class XMPPClient {
 
 	    private ChatManager chatManager;
 	    private MessageListener messageListener;
-	
+	    
+	    
+	    private Roster roster =null;
 	
 	
 	XMPPClient()
@@ -87,17 +88,11 @@ class XMPPClient {
 	
 	public void closeConnection()
 	{
-	    	connection.disconnect();
-	}
-
-	
-	public void destroy()
-	{
-        if (connection!=null && connection.isConnected()) 
+		if (connection!=null && connection.isConnected()) 
         {
             connection.disconnect();
         }
-    }
+	}
 	
 	
 	public void sendMessage(String message, String buddyJID) throws XMPPException
@@ -107,29 +102,9 @@ class XMPPClient {
         chat.sendMessage(message);
     }
 	
-	
-	public void createEntry(String user, String name, String[] groupn) throws Exception
-	{
-        System.out.println(String.format("Creating entry for buddy '%1$s' with name %2$s", user, name));
-        Roster roster = connection.getRoster();
-        roster.createEntry(user, name, groupn);
-    }
-	
-	 public void createGroup(String groupName, String userName, String nickName) throws XMPPException
-	 {
-	    	Roster roster = connection.getRoster();
-	    	RosterGroup group = roster.createGroup(groupName);
-			roster.createEntry(userName, nickName, new String[] { group.getName() });
-	 }
-	    
-	 public void addUserToGroup(String[] groupName, String userName, String nickName) throws XMPPException
-	 {
-	    	Roster roster = connection.getRoster();
-	    	roster.createEntry(userName, nickName, groupName);
-	 }
 	 public void getRosterDetail(String groupName)
 	 {
-	    	Roster roster = connection.getRoster();
+	    	
 	    	RosterGroup rostergroup = roster.getGroup(groupName);
 	    	Collection<RosterEntry> entries = rostergroup.getEntries();
 	    	Iterator<RosterEntry> iter = entries.iterator();
@@ -149,7 +124,7 @@ class XMPPClient {
 	 
 	 public void getAllRosterGroup()
 	 {
-	    	Roster roster = connection.getRoster();
+	    	
 	    	Collection<RosterGroup> entries = roster.getGroups();
 	    	Iterator<RosterGroup> iter = entries.iterator();
 	    	buddySize = entries.size();  
@@ -166,7 +141,7 @@ class XMPPClient {
 	   }
 	 public void getUserRoster(String userName)
 	 {
-	    	Roster roster = connection.getRoster();
+	    	
 	    	RosterEntry rosterentry = roster.getEntry(userName);
 	    	Collection<RosterGroup> entries = rosterentry.getGroups();
 	    	Iterator<RosterGroup> iter = entries.iterator();
@@ -175,7 +150,8 @@ class XMPPClient {
 	        buddies = new String[buddySize];
 	        int i = 0;
 	        System.out.println("Groups Belong to: " + userName);
-	        while (iter.hasNext()) {
+	        while (iter.hasNext()) 
+	        {
 	            RosterGroup rostergroup = (RosterGroup) iter.next();
 	            buddies[i] = rostergroup.getName();
 	            i++;
@@ -186,9 +162,9 @@ class XMPPClient {
 	 }
 	 
 	 
-	 public void displayBuddy()
+	 public void displayBuddyList()
 	 {
-	        Roster roster = connection.getRoster();
+	        
 	        Collection<RosterEntry> entries = roster.getEntries();
 	        System.out.println("Total Providers!!");
 	        System.out.println(entries.size() + " Providers \n");
@@ -204,8 +180,11 @@ class XMPPClient {
 	            System.out.println(i + ". " + rosterEntry.getUser());          
 	        }
 	        System.out.println("----------");
-	    }
-	 
+	 }
+	 public void updateRoster()
+	 {
+		 roster = connection.getRoster();
+	 }
 	 
 	
 }
