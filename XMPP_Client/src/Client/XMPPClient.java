@@ -9,7 +9,7 @@ import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
+
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -34,8 +34,8 @@ class XMPPClient {
 	    int buddySize = 0;
 	    String[] buddies = null;
 	    
-	    private ConnectionConfiguration config;
-	    private XMPPConnection connection;
+	    public ConnectionConfiguration config;
+	    public XMPPConnection connection;
 
 	    private ChatManager chatManager;
 	    private MessageListener messageListener;

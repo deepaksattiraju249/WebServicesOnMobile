@@ -26,6 +26,7 @@ public class RosterService
 	RosterService()
 	{
 		myServer = new XMPPServer("RosterService.org");
+		
 	}
 
 }
