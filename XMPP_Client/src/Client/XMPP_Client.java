@@ -68,6 +68,7 @@ public class XMPP_Client {
     }
 	public void closeConnection()
 	{
+		this.setStatus(false, null);
 		if (con!=null && con.isConnected()) 
         {
             con.disconnect();

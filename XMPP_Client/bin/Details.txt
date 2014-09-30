@@ -1,5 +1,1 @@
-Server will maintain roster.
-The client residing on the same node will access that Roster.
-
-The client can send a message to its own XMPP_Server or
-The client can send a message to the one's in its list.
+Replace all the connection configs to Local host later
