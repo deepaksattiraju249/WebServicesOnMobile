@@ -44,11 +44,11 @@ class XMPPClient {
 	    private Roster roster =null;
 	
 	
-	XMPPClient()
+	XMPPClient(String centralIP, int port, String Service, String userID, String Upassword)
 	{			
 		SmackConfiguration.setPacketReplyTimeout(packetReplyTimeout);
 		//Setup Initialization
-		config = new ConnectionConfiguration("10.200.40.153",5222,"vysper.org");
+		config = new ConnectionConfiguration(centralIP, port, Service);
 		config.setSecurityMode(ConnectionConfiguration.SecurityMode.enabled);
 		config.setSASLAuthenticationEnabled(true);
 		config.setSelfSignedCertificateEnabled(true);
@@ -60,7 +60,7 @@ class XMPPClient {
 		try
 		{
 			connection.connect();
-			connection.login("user1@vysper.org","user1");
+			connection.login(userID, Upassword);
 		}
 		catch(XMPPException ex)
 		{
@@ -71,7 +71,7 @@ class XMPPClient {
 		}
 		
 		System.out.println("Connection Successful");		
-		
+		roster = connection.getRoster();
 		
 	}
 	
@@ -97,9 +97,19 @@ class XMPPClient {
 	
 	public void sendMessage(String message, String buddyJID) throws XMPPException
 	{
+		
         System.out.println(String.format("Sending mesage '%1$s' to user %2$s", message, buddyJID));
+        
+        
+        
+        
+        
+        
+        
         Chat chat = chatManager.createChat(buddyJID, messageListener);
         chat.sendMessage(message);
+        
+        
     }
 	
 	 public void getRosterDetail(String groupName)
@@ -181,6 +191,9 @@ class XMPPClient {
 	        }
 	        System.out.println("----------");
 	 }
+	 
+	 
+	 
 	 public void updateRoster()
 	 {
 		 roster = connection.getRoster();
