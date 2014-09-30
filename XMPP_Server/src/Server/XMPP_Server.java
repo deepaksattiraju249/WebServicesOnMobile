@@ -21,12 +21,28 @@ import org.apache.vysper.xmpp.server.s2s.XMPPServerConnectorRegistry;
 import org.apache.vysper.xmpp.stanza.IQStanzaType;
 import org.apache.vysper.xmpp.stanza.StanzaBuilder;
 
+import org.jivesoftware.smack.ChatManager;
+import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.SmackConfiguration;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 
+import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
 
 public class XMPP_Server{
 	
 	XMPPServer thisServer;
-	
+	private Roster roster;
 	
 	XMPP_Server(String service, int PORT) throws Exception
 	{
@@ -36,13 +52,25 @@ public class XMPP_Server{
 		thisServer.setStorageProviderRegistry(providerRegistry);
 		
 		AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
-		
 		S2SEndpoint s2sEndpoint = new S2SEndpoint();
 		s2sEndpoint.setPort(PORT);
 		thisServer.addEndpoint(s2sEndpoint);
 		thisServer.start();
+		update_Roster();
+	}
+	
+	
+	void update_Roster()
+	{
+		// Getting the roster of the central roster server
+		ConnectionConfiguration config = new ConnectionConfiguration("10.200.40.153",5222,"roster.org");
+		
 		
 	}
+	
+	
+	
+	
 	
 	public static void main(String args[]) throws Exception
 	{

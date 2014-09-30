@@ -55,5 +55,9 @@
 	<classpathentry kind="lib" path="ExternalLibraries/xep0124-xep0206-bosh-0.7.jar"/>
 	<classpathentry kind="lib" path="ExternalLibraries/xercesImpl-2.8.1.jar"/>
 	<classpathentry kind="lib" path="ExternalLibraries/xml-apis-1.3.03.jar"/>
+	<classpathentry kind="lib" path="D:/B.T.P/XMPP Code/Client Jars/smack.jar"/>
+	<classpathentry kind="lib" path="D:/B.T.P/XMPP Code/Client Jars/smack-3.1.0.jar"/>
+	<classpathentry kind="lib" path="D:/B.T.P/XMPP Code/Client Jars/smackx-3.1.0.jar"/>
+	<classpathentry kind="lib" path="D:/B.T.P/XMPP Code/Client Jars/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
