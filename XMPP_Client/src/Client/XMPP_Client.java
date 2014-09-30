@@ -1,6 +1,5 @@
 package Client;
 
-
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -9,7 +8,6 @@ import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -22,59 +20,42 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 
-
-class XMPPClient {
+public class XMPP_Client {
+	int packetReplyTimeout = 500;
+	ConnectionConfiguration config = null;
+	XMPPConnection con = null;
+	Roster roster = null;
 	
-	
-	  private static final int packetReplyTimeout = 500; // millis  
-	    public String server;
-	    public int port;
-	    public String servername;
-	    
-	    int buddySize = 0;
-	    String[] buddies = null;
-	    
-	    public ConnectionConfiguration config;
-	    public XMPPConnection connection;
-
-	    private ChatManager chatManager;
-	    private MessageListener messageListener;
-	    
-	    
-	    private Roster roster =null;
-	
-	
-	XMPPClient(String centralIP, int port, String Service, String userID, String Upassword)
-	{			
+	XMPP_Client(String userName, String password) throws Exception
+	{
 		SmackConfiguration.setPacketReplyTimeout(packetReplyTimeout);
-		//Setup Initialization
-		config = new ConnectionConfiguration(centralIP, port, Service);
+		
+		config = new ConnectionConfiguration("10.200.40.153",5222,"roster.org");
 		config.setSecurityMode(ConnectionConfiguration.SecurityMode.enabled);
 		config.setSASLAuthenticationEnabled(true);
 		config.setSelfSignedCertificateEnabled(true);
         config.setKeystorePath("src/Client/bogus_mina_tls.cert");
         config.setTruststorePath("src/Client/bogus_mina_tls.cert");
 		config.setTruststorePassword("boguspw");
-		connection = new XMPPConnection(config);
 		
-		try
-		{
-			connection.connect();
-			connection.login(userID, Upassword);
-		}
-		catch(XMPPException ex)
-		{
-			System.out.println("=============Error=============");
-			System.out.println(ex);
-			System.out.println("Check the connection");
-			System.out.println("===============================");			
-		}
+		con = new XMPPConnection(config);
 		
-		System.out.println("Connection Successful");		
-		roster = connection.getRoster();
+		con.connect();
+		con.login(userName, password);		
+		roster = con.getRoster();
 		
 	}
 	
+	
+	public void PrintRoster()
+	{
+		Collection<RosterEntry> entries = roster.getEntries();
+		for(RosterEntry entry: entries)
+		{
+			 System.out.println(String.format("Buddy:%1$s - Status:%2$s", entry.getName(), entry.getStatus()));
+
+		}
+	}
 	public void setStatus(boolean available, String status) 
 	{
         
@@ -82,44 +63,63 @@ class XMPPClient {
         Presence presence = new Presence(type);
         
         presence.setStatus(status);
-        connection.sendPacket(presence);
+        con.sendPacket(presence);
      
     }
-	
 	public void closeConnection()
 	{
-		if (connection!=null && connection.isConnected()) 
+		if (con!=null && con.isConnected()) 
         {
-            connection.disconnect();
+            con.disconnect();
         }
 	}
 	
+	void ReplytoMessage(Chat chat,Message message) throws Throwable
+	{
+		String reply="";
+		
+		
+		try{
+		chat.sendMessage(reply);
+		}
+		catch(Exception ex){
+			System.out.println(ex);
+		}
+	}
 	
 	public void sendMessage(String message, String buddyJID) throws XMPPException
 	{
 		
         System.out.println(String.format("Sending mesage '%1$s' to user %2$s", message, buddyJID));
-        
-        
-        
-        
-        
-        
-        
-        Chat chat = chatManager.createChat(buddyJID, messageListener);
+        ChatManager chatManager = con.getChatManager();
+        Chat chat = chatManager.createChat(buddyJID, new MessageListener() {
+
+			@Override
+			public void processMessage(Chat arg0, Message arg1) {
+				// TODO Auto-generated method stub
+				 try {
+					ReplytoMessage(arg0,arg1);
+				} catch (Throwable e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+        	
+        });
         chat.sendMessage(message);
         
         
     }
 	
-	 public void getRosterDetail(String groupName)
+	public void getRosterDetail(String groupName)
 	 {
 	    	
 	    	RosterGroup rostergroup = roster.getGroup(groupName);
 	    	Collection<RosterEntry> entries = rostergroup.getEntries();
 	    	Iterator<RosterEntry> iter = entries.iterator();
-	    	buddySize = entries.size();  
-	        buddies = new String[buddySize];
+	    	int buddySize = entries.size();  
+	        String[] buddies = new String[buddySize];
 	        int i = 0;
 	        System.out.println(rostergroup.getName() + " have subscribed users: " + rostergroup.getEntryCount());
 	        while (iter.hasNext()) 
@@ -132,13 +132,14 @@ class XMPPClient {
 	    	
 	  }
 	 
-	 public void getAllRosterGroup()
+	
+	public void getAllRosterGroup()
 	 {
 	    	
 	    	Collection<RosterGroup> entries = roster.getGroups();
 	    	Iterator<RosterGroup> iter = entries.iterator();
-	    	buddySize = entries.size();  
-	        buddies = new String[buddySize];
+	    	int buddySize = entries.size();  
+	        String[] buddies = new String[buddySize];
 	        int i = 0;
 	        System.out.println("Groups formed: ");
 	        while (iter.hasNext()) 
@@ -156,8 +157,8 @@ class XMPPClient {
 	    	Collection<RosterGroup> entries = rosterentry.getGroups();
 	    	Iterator<RosterGroup> iter = entries.iterator();
 	    	
-	    	buddySize = entries.size();  
-	        buddies = new String[buddySize];
+	    	int buddySize = entries.size();  
+	        String[] buddies = new String[buddySize];
 	        int i = 0;
 	        System.out.println("Groups Belong to: " + userName);
 	        while (iter.hasNext()) 
@@ -179,8 +180,9 @@ class XMPPClient {
 	        System.out.println("Total Providers!!");
 	        System.out.println(entries.size() + " Providers \n");
 	        Iterator<RosterEntry> iter = entries.iterator();
-	        buddySize = entries.size();  
-	        buddies = new String[buddySize];
+	        int buddySize = entries.size();  
+	        String[] buddies = new String[buddySize];
+	        
 	        int i = 0;
 	        while (iter.hasNext()) 
 	        {
@@ -196,8 +198,7 @@ class XMPPClient {
 	 
 	 public void updateRoster()
 	 {
-		 roster = connection.getRoster();
+		 roster = con.getRoster();
 	 }
 	 
-	
 }
