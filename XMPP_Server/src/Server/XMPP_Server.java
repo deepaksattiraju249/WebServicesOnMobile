@@ -20,30 +20,18 @@ public class XMPP_Server{
 		StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
 		thisServer.setStorageProviderRegistry(providerRegistry);
 		
-		AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
-		S2SEndpoint s2sEndpoint = new S2SEndpoint();
-		s2sEndpoint.setPort(PORT);
-		thisServer.addEndpoint(s2sEndpoint);
+//		AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
+//		S2SEndpoint s2sEndpoint = new S2SEndpoint();
+//		s2sEndpoint.setPort(PORT);
+//		thisServer.addEndpoint(s2sEndpoint);
 		thisServer.start();
-		update_Roster();
-	}
-	
-	
-	void update_Roster()
-	{
-		// Getting the roster of the central roster server
-		ConnectionConfiguration config = new ConnectionConfiguration("10.200.40.153",5222,"roster.org");
-		
 		
 	}
-	
-	
-	
-	
+
 	
 	public static void main(String args[]) throws Exception
 	{
-		XMPP_Server a = new XMPP_Server("deepak.org",1234);
+		XMPP_Server a = new XMPP_Server("server.org",5222);
 		
 	}
 	

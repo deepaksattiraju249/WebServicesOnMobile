@@ -19,18 +19,20 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
-
+import java.net.InetAddress;
 public class XMPP_Client {
 	int packetReplyTimeout = 500;
 	ConnectionConfiguration config = null;
 	XMPPConnection con = null;
 	Roster roster = null;
-	
+	String userNameG = "", passwordG =""; 
 	XMPP_Client(String userName, String password) throws Exception
 	{
+		userNameG = userName;
+		passwordG = password;
 		SmackConfiguration.setPacketReplyTimeout(packetReplyTimeout);
 		
-		config = new ConnectionConfiguration("10.200.40.153",5222,"roster.org");
+		config = new ConnectionConfiguration("10.200.40.153",5222,"vysper.org");
 		config.setSecurityMode(ConnectionConfiguration.SecurityMode.enabled);
 		config.setSASLAuthenticationEnabled(true);
 		config.setSelfSignedCertificateEnabled(true);
@@ -44,8 +46,51 @@ public class XMPP_Client {
 		con.login(userName, password);		
 		roster = con.getRoster();
 		
+		ConnectToAllServers();
+		
+		
 	}
+	void ConnectToAllServers() throws XMPPException
+	{
+		
+		Collection<RosterEntry> entries = roster.getEntries();
+		for(RosterEntry entry : entries)
+		{
+			
+	        ChatManager chatManager = con.getChatManager();
+	        Chat chat = chatManager.createChat(entry.getName(), new MessageListener() {
+
+				@Override
+				public void processMessage(Chat arg0, Message arg1) {
+					// TODO Auto-generated method stub
+					 try {
+						 
+						 ConnectionConfiguration temp = new ConnectionConfiguration(arg1.getBody(),5222,"server.org");
+						 temp.setSecurityMode(ConnectionConfiguration.SecurityMode.enabled);
+						 temp.setSASLAuthenticationEnabled(true);
+						 temp.setSelfSignedCertificateEnabled(true);
+				         temp.setKeystorePath("src/Client/bogus_mina_tls.cert");
+				         temp.setTruststorePath("src/Client/bogus_mina_tls.cert");
+						 temp.setTruststorePassword("boguspw");
+						 
+						 XMPPConnection x = new XMPPConnection(temp);
+						 x.connect();
+						 x.login(userNameG, passwordG);
+						 
+					} catch (Throwable e) {
+						// TODO Auto-generated catch block
+						System.out.println("Fishy with the connection");
+						e.printStackTrace();
+					}
+					
+				}
+	        	
+	        });
+	        chat.sendMessage("IP");
+	        
+		}
 	
+	}
 	
 	public void PrintRoster()
 	{
@@ -78,7 +123,17 @@ public class XMPP_Client {
 	void ReplytoMessage(Chat chat,Message message) throws Throwable
 	{
 		String reply="";
-		
+		if(message.getBody() == "IP")
+		{
+			try {
+				  InetAddress addr = InetAddress.getLocalHost();
+				  reply = addr.getHostAddress();
+			}
+			catch(Exception ex)
+			{
+				reply = "";
+			}
+		}
 		
 		try{
 		chat.sendMessage(reply);
@@ -128,7 +183,8 @@ public class XMPP_Client {
 	            RosterEntry rosterEntry = (RosterEntry) iter.next();
 	            buddies[i] = rosterEntry.getUser();
 	            i++;
-	            System.out.println(rosterEntry.getUser());          
+	            System.out.println(rosterEntry.getUser());
+	            	
 	        }
 	    	
 	  }
