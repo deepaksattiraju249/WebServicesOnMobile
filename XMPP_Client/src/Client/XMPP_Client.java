@@ -32,7 +32,7 @@ public class XMPP_Client {
 		passwordG = password;
 		SmackConfiguration.setPacketReplyTimeout(packetReplyTimeout);
 		
-		config = new ConnectionConfiguration("10.200.40.153",5222,"vysper.org");
+		config = new ConnectionConfiguration("localhost",5222,"server.org"); //Connection to Local Server
 		config.setSecurityMode(ConnectionConfiguration.SecurityMode.enabled);
 		config.setSASLAuthenticationEnabled(true);
 		config.setSelfSignedCertificateEnabled(true);
