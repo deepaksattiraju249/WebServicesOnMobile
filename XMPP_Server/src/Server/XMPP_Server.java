@@ -7,6 +7,8 @@ import org.apache.vysper.xmpp.authorization.AccountManagement;
 import org.apache.vysper.xmpp.modules.roster.Roster;
 import org.apache.vysper.xmpp.server.XMPPServer;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.apache.vysper.xmpp.addressing.Entity;
+import org.apache.vysper.xmpp.addressing.EntityImpl;
 
 public class XMPP_Server{
 	
@@ -20,11 +22,18 @@ public class XMPP_Server{
 		StorageProviderRegistry providerRegistry = new MemoryStorageProviderRegistry();
 		thisServer.setStorageProviderRegistry(providerRegistry);
 		
-//		AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
+		AccountManagement accountManagement = (AccountManagement) providerRegistry.retrieve(AccountManagement.class);
 //		S2SEndpoint s2sEndpoint = new S2SEndpoint();
 //		s2sEndpoint.setPort(PORT);
 //		thisServer.addEndpoint(s2sEndpoint);
 		thisServer.start();
+		for(int i = 1 ; i< 21;i++)
+		{
+			Entity user = EntityImpl.parseUnchecked("user"+i+"@server.org");
+			accountManagement.addUser(user, "pass"+i);
+			
+		}
+		
 		
 	}
 

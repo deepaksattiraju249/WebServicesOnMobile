@@ -10,6 +10,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
@@ -19,13 +20,15 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
+
 import java.net.InetAddress;
 public class XMPP_Client {
 	int packetReplyTimeout = 500;
 	ConnectionConfiguration config = null;
 	XMPPConnection con = null;
 	Roster roster = null;
-	String userNameG = "", passwordG =""; 
+	String userNameG = "", passwordG ="";
+	ChatManager chatmanager = null;
 	XMPP_Client(String userName, String password) throws Exception
 	{
 		userNameG = userName;
@@ -46,10 +49,47 @@ public class XMPP_Client {
 		con.login(userName, password);		
 		roster = con.getRoster();
 		
+		for(int i = 1;i<21;i++) // Makes sure whenever the server is reset{i.e. you close the default roster server}, Our node should subscribe to all the new nodes again 
+		{
+			roster.createEntry("user"+i+"@vysper.org", null, null);
+		}
+		
+		
 		ConnectToAllServers();
+		SetUpChatListeners();
 		
 		
 	}
+	
+	void SetUpChatListeners()
+	{
+		chatmanager = con.getChatManager();
+		chatmanager.addChatListener(new ChatManagerListener(){
+			public void chatCreated(Chat chat, boolean createdLocally)
+			{
+				if (!createdLocally)
+					chat.addMessageListener(new MessageListener(){
+
+						@Override
+						public void processMessage(Chat arg0, Message arg1) {
+							// TODO Auto-generated method stub
+							try {
+								ReplytoMessage(arg0, arg1);
+							} catch (Throwable e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+						}
+						
+					});;
+			}
+		});
+		
+		
+	}
+	
+	
 	void ConnectToAllServers() throws XMPPException
 	{
 		
@@ -77,16 +117,16 @@ public class XMPP_Client {
 						 x.connect();
 						 x.login(userNameG, passwordG);
 						 
+						 
 					} catch (Throwable e) {
 						// TODO Auto-generated catch block
-						System.out.println("Fishy with the connection");
-						e.printStackTrace();
 					}
 					
 				}
 	        	
 	        });
 	        chat.sendMessage("IP");
+	        roster.createEntry(entry.getUser(), entry.getName(), null);
 	        
 		}
 	
@@ -111,6 +151,7 @@ public class XMPP_Client {
         con.sendPacket(presence);
      
     }
+	
 	public void closeConnection()
 	{
 		this.setStatus(false, null);
@@ -226,7 +267,6 @@ public class XMPP_Client {
 	            System.out.println(rostergroup.getName());
 	        }
 	    	
-	    	
 	 }
 	 
 	 
@@ -246,7 +286,7 @@ public class XMPP_Client {
 	            RosterEntry rosterEntry = (RosterEntry) iter.next();
 	            buddies[i] = rosterEntry.getUser();
 	            i++;
-	            System.out.println(i + ". " + rosterEntry.getUser());          
+	            System.out.println(i + ". " + rosterEntry.getUser() + "Presence "+rosterEntry.getStatus());          
 	        }
 	        System.out.println("----------");
 	 }
