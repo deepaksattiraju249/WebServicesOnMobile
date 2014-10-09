@@ -15,6 +15,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.StringReader;
 import java.util.Arrays;
 import jdk.internal.org.xml.sax.InputSource;
@@ -36,14 +38,6 @@ public class ServerNode {
     {
         roster = new HashMap<>();
     }
-    public static Document loadXMLFromString(String xml) throws Exception
-    {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new ByteArrayInputStream(xml.getBytes()));
-    }
-    
     void Register(String service , String IPAddress)
     {
         roster. put(service, IPAddress);
@@ -54,16 +48,39 @@ public class ServerNode {
         return roster.get(service);
     }
     
-    String MakePacket(String type , String Body)
-    {
-        return "";
-    }
     
-    String ProcessMessage(String receivedBody) throws Exception 
+    
+    
+    HashMap<String,String> ProcessMessage(HashMap<String,String> receivedBody) throws Exception 
     {
-        Document messageTree = loadXMLFromString(receivedBody);
+        HashMap<String, String> reply = new HashMap<>();
+        String type = receivedBody.get("Type");
+        switch(type)
+        {
+            case "Login":
+            {
+                
+                Register(receivedBody.get("service"), receivedBody.get("IP"));
+                reply.put("Body", "Registered");
+            }
+                
+            case "Request":
+            {
+                reply.put("RequestedIP", fetch(reply.get("Who")));
+            }
+                
+            case "Logout":
+            {
+                roster.remove(receivedBody.get("FromService"));
+            }
+                
+            default:{
+                
+            }
+                
+        }
         
-        return " ";
+        return null;
        
     }
     
@@ -76,11 +93,14 @@ public class ServerNode {
         while(true)
         {
             Socket senderSocket =  listener.accept();
-            DataInputStream in = new DataInputStream(senderSocket.getInputStream());
-            String receivedBody = in.readUTF();
+            ObjectInputStream in = new ObjectInputStream(senderSocket.getInputStream());
+            HashMap<String,String> receivedBody = (HashMap<String,String>)in.readObject();
             System.out.println("Message From : " + Arrays.toString(senderSocket.getLocalAddress().getAddress()) );
             System.out.println(receivedBody);
-            String reply = "";
+            
+            
+            
+            HashMap<String,String> reply = new HashMap<>();
              
             
             try{
@@ -92,8 +112,8 @@ public class ServerNode {
             }
             System.out.println("Reply Sent .. " );
             System.out.println(reply);
-            DataOutputStream out = new DataOutputStream(senderSocket.getOutputStream());
-            out.writeUTF(reply);
+            ObjectOutputStream out = new ObjectOutputStream(senderSocket.getOutputStream());
+            out.writeObject(reply);
             senderSocket.close();
         }
         
