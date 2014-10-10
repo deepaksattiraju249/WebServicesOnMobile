@@ -5,6 +5,7 @@
  */
 package SuperPeer;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -15,6 +16,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringReader;
@@ -30,13 +35,41 @@ import jdk.internal.org.xml.sax.InputSource;
 public class ServerNode {
     
     public static ServerNode thisServer = new ServerNode();
+    
     HashMap<String,String> roster;
+    String service = "GroupServer";
+    public void FileUpdate() throws FileNotFoundException, IOException 
+    {
+        FileReader peers = new FileReader("peers.txt");
+        BufferedReader reader = new BufferedReader(peers);
+        String peer = "";
+        String IP = "";
+        while((peer = reader.readLine())!= null)
+        {
+            IP = reader.readLine();
+            roster.put(peer, IP);
+        }
+        
+    }
+    
+    HashMap<String,String> makeMessage(String body , String type,String to)
+    {
+        HashMap<String,String> message = new HashMap<>();
+        message.put("From", service);
+        message.put("To",to);
+        message.put("Body",body);
+        message.put("Type", type);
+        return message;
+    }
+    
     
     
     
     public ServerNode() 
     {
+        
         roster = new HashMap<>();
+        
     }
     void Register(String service , String IPAddress)
     {
@@ -60,27 +93,30 @@ public class ServerNode {
             case "Login":
             {
                 
-                Register(receivedBody.get("service"), receivedBody.get("IP"));
-                reply.put("Body", "Registered");
+                Register(receivedBody.get("Service"), receivedBody.get("IP"));
+                reply.put("Body", "Successfuly Registered");
             }
                 
             case "Request":
             {
-                reply.put("RequestedIP", fetch(reply.get("Who")));
+                reply.put("RequestedIP", fetch(receivedBody.get("Body")));
             }
                 
             case "Logout":
             {
                 roster.remove(receivedBody.get("FromService"));
+                reply.put("Body", "Removed");
             }
                 
-            default:{
-                
+            default:
+            {
+                reply.put("Type", "Error");
+                reply.put("Body","No type like the one's you have requested");
             }
                 
         }
         
-        return null;
+        return reply;
        
     }
     
