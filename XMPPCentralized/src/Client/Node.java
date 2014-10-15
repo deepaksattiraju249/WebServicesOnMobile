@@ -27,7 +27,7 @@ public class Node
     String service;
     String groupServer = "10.200.110.41"; // The group Server
     String MyIP;
-    
+    HashMap<String,String> LocalRoster;
     Node() throws UnknownHostException
     {
         InetAddress addr = InetAddress.getLocalHost();
@@ -48,7 +48,7 @@ public class Node
     
     
     
-    void sendMessage(HashMap<String,String> m)
+    void sendMessage(HashMap<String,String> m) throws IOException
     {
         
         int port = 5222;
@@ -64,7 +64,15 @@ public class Node
         ObjectInputStream inp = new ObjectInputStream(input);
         
         HashMap<String,String> reply = (HashMap<String,String>)inp.readObject();
-        System.out.println(reply.get("Body"));
+        if(reply.get("Type").equals("Roster"))
+        {
+            LocalRoster = reply;
+            System.out.println("Roster Updated");
+        }
+        else
+        {
+            System.out.println(reply.get("Body"));
+        }
         client.close();
         }
         catch(Exception ex)
@@ -73,7 +81,7 @@ public class Node
         }
     }
     
-    void Login()
+    void Login() throws IOException
     {
         HashMap<String,String> message = makeMessage(null, "Login");
         message.put("IP", MyIP);
@@ -84,17 +92,24 @@ public class Node
     
     
     
-    void requestAService(String service)
+    void requestAService(String service) throws IOException
     {
         HashMap<String,String> message = makeMessage(service, "Request");
         sendMessage(message);
     }
     
-    void LogOut()
+    void LogOut() throws IOException
     {
         HashMap<String,String> message = makeMessage(null, "Logout");
         sendMessage(message);
     }
+    
+    void getRoster() throws IOException
+    {
+        HashMap<String,String> message = makeMessage("Roster","Roster");
+        sendMessage(message);
+    }
+    
     
     public static void main(String [] args) throws IOException
     {
@@ -102,8 +117,7 @@ public class Node
         String service = null;
         thisNode = new Node();
         thisNode.service = "";
-        thisNode.requestAService(service);
-        
+        thisNode.requestAService(service);   
         
     }
     

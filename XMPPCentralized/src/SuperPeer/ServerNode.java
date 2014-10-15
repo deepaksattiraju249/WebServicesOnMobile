@@ -101,7 +101,11 @@ public class ServerNode {
             {
                 reply.put("RequestedIP", fetch(receivedBody.get("Body")));
             }
-                
+            case "Roster":
+            {
+                reply = roster;
+                reply.put("Type", "Roster");
+            }
             case "Logout":
             {
                 roster.remove(receivedBody.get("FromService"));
